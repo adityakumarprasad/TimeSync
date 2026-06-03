@@ -1,0 +1,14 @@
+{
+  "name": "task-and-time-tracker",
+  "version": "1.0.0",
+  "description": "Full-stack MERN Task & Time Tracker app with Tailwind, shadcn, motion",
+  "scripts": {
+    "install:all": "npm install && npm install --prefix server && npm install --prefix client",
+    "client": "npm run dev --prefix client",
+    "server": "npm run dev --prefix server",
+    "dev": "concurrently \"npm run server\" \"npm run client\""
+  },
+  "dependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
