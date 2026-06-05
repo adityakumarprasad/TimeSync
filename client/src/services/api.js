@@ -1,4 +1,5 @@
 const TOKEN_KEY = 'task_ai_token';
+const API_BASE = import.meta.env.VITE_API_URL || '';
 
 let token = localStorage.getItem(TOKEN_KEY) || null;
 
@@ -35,7 +36,7 @@ const api = {
     };
 
     try {
-      const response = await fetch(endpoint, config);
+      const response = await fetch(`${API_BASE}${endpoint}`, config);
       const data = await response.json();
 
       if (!response.ok) {
