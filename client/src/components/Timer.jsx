@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react';
 import api from '../services/api';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Play, Square, Clock, Trash2, Calendar, FileText, CheckCircle } from 'lucide-react';
+import { Clock, Square, Calendar, ArrowRight, Trash2, Copy } from 'lucide-react';
 
 const Timer = ({ tasks, timeLogs, fetchTasks, fetchTimeLogs, runningTask, onStopTimer }) => {
   const [elapsed, setElapsed] = useState(0);
@@ -19,9 +17,7 @@ const Timer = ({ tasks, timeLogs, fetchTasks, fetchTimeLogs, runningTask, onStop
         setElapsed(Math.max(0, Math.floor((now - start) / 1000)));
       };
 
-      // Set initial elapsed
       calculateElapsed();
-
       interval = setInterval(calculateElapsed, 1000);
     } else {
       setElapsed(0);
@@ -43,7 +39,7 @@ const Timer = ({ tasks, timeLogs, fetchTasks, fetchTimeLogs, runningTask, onStop
     }
   };
 
-  // Helper: Format seconds to HH:MM:SS
+  // Helper: Format seconds to HH : MM : SS format with spaces
   const formatTimeStr = (totalSeconds) => {
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
@@ -53,7 +49,7 @@ const Timer = ({ tasks, timeLogs, fetchTasks, fetchTimeLogs, runningTask, onStop
       hours.toString().padStart(2, '0'),
       minutes.toString().padStart(2, '0'),
       seconds.toString().padStart(2, '0')
-    ].join(':');
+    ].join(' : ');
   };
 
   // Helper: Pretty format seconds to readable string
@@ -61,9 +57,10 @@ const Timer = ({ tasks, timeLogs, fetchTasks, fetchTimeLogs, runningTask, onStop
     if (totalSeconds < 60) return `${totalSeconds}s`;
     const m = Math.floor(totalSeconds / 60);
     const s = totalSeconds % 60;
-    if (m < 60) return `${m}m ${s}s`;
+    if (m < 60) return `${m}m`;
     const h = Math.floor(m / 60);
     const min = m % 60;
+    if (min === 0) return `${h}h`;
     return `${h}h ${min}m`;
   };
 
@@ -73,6 +70,24 @@ const Timer = ({ tasks, timeLogs, fetchTasks, fetchTimeLogs, runningTask, onStop
     return d.toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
   };
 
+  // Copy all logs to clipboard helper
+  const handleCopyLogs = () => {
+    if (timeLogs.length === 0) return;
+    const text = timeLogs
+      .map(
+        (log) =>
+          `${log.taskId ? log.taskId.title : 'Deleted Task'}: ${formatDateTime(
+            log.startTime
+          )} - ${new Date(log.endTime).toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+          })} (${formatDurationFriendly(log.duration)})`
+      )
+      .join('\n');
+    navigator.clipboard.writeText(text);
+    alert('Session logs copied to clipboard!');
+  };
+
   // Aggregate time spent on EACH task
   const getTaskAggregations = () => {
     const aggregates = {};
@@ -80,6 +95,7 @@ const Timer = ({ tasks, timeLogs, fetchTasks, fetchTimeLogs, runningTask, onStop
     // Seed with all current tasks
     tasks.forEach(t => {
       aggregates[t._id] = {
+        _id: t._id,
         title: t.title,
         status: t.status,
         totalSeconds: 0
@@ -93,8 +109,8 @@ const Timer = ({ tasks, timeLogs, fetchTasks, fetchTimeLogs, runningTask, onStop
         if (aggregates[tId]) {
           aggregates[tId].totalSeconds += log.duration;
         } else {
-          // If task was deleted but log remains
           aggregates[tId] = {
+            _id: tId,
             title: log.taskId.title || 'Deleted Task',
             status: 'Deleted',
             totalSeconds: log.duration
@@ -109,144 +125,154 @@ const Timer = ({ tasks, timeLogs, fetchTasks, fetchTimeLogs, runningTask, onStop
   const taskAggs = getTaskAggregations();
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-8">
       {/* Active Clock Banner */}
-      <Card className="border-zinc-800 bg-zinc-900/30 backdrop-blur-xl relative overflow-hidden shadow-xl shadow-black/20">
-        <div className="absolute top-[-10%] right-[-10%] w-[30%] h-[50%] rounded-full bg-violet-600/5 blur-[80px] pointer-events-none" />
-        <CardContent className="p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-4 text-center md:text-left flex-col md:flex-row">
-            <div className={`p-4 rounded-full ${
-              runningTask ? 'bg-red-500/10 border border-red-500/20 text-red-400 animate-pulse' : 'bg-zinc-800 border border-zinc-700 text-zinc-400'
-            }`}>
-              <Clock className="w-8 h-8" />
-            </div>
-            <div>
-              <h3 className="text-xl font-bold text-white tracking-tight">
-                {runningTask ? 'Session Timer Active' : 'No Active Session'}
-              </h3>
-              <p className="text-zinc-400 text-sm mt-0.5">
-                {runningTask ? (
-                  <>Currently working on: <span className="text-violet-400 font-semibold">{runningTask.title}</span></>
-                ) : (
-                  'Select start timer on any task in the directory to begin tracking.'
-                )}
-              </p>
-            </div>
+      <div className="shadow-[0_4px_20px_rgba(0,0,0,0.05)] rounded-2xl bg-emerald-50/40 border border-emerald-500/20 flex p-8 justify-between items-center">
+        <div className="flex items-center gap-6">
+          <div className={`size-20 shadow-[0_0_20px_rgba(16,185,129,0.2)] rounded-full bg-white border border-emerald-500/30 flex justify-center items-center ${
+            runningTask ? 'animate-pulse' : ''
+          }`}>
+            <Clock className="size-9 text-emerald-500" />
           </div>
+          <div className="flex flex-col gap-1">
+            <h2 className="font-bold text-slate-900 text-2xl leading-8">
+              {runningTask ? 'Active Session' : 'No Active Session'}
+            </h2>
+            <p className={`font-semibold text-base leading-6 ${runningTask ? 'text-emerald-600' : 'text-slate-500'}`}>
+              {runningTask ? runningTask.title : 'Select start timer on any task in the directory to begin tracking.'}
+            </p>
+          </div>
+        </div>
+        
+        <div className="flex flex-col items-end gap-4">
+          <span className="bg-[linear-gradient(135deg,#059669,#10B981)] bg-clip-text text-transparent drop-shadow-[0_2px_8px_rgba(16,185,129,0.15)] font-mono font-bold text-5xl leading-12 tracking-wider">
+            {formatTimeStr(elapsed)}
+          </span>
+          {runningTask && (
+            <button 
+              onClick={() => onStopTimer(runningTask._id)}
+              className="shadow-[0_4px_12px_rgba(220,38,38,0.2)] font-semibold rounded-lg bg-red-600 text-white text-sm leading-5 flex px-6 py-2.5 items-center gap-2 hover:bg-red-700 cursor-pointer transition-colors"
+            >
+              <Square className="size-4 fill-current" />
+              <span>Stop Timer</span>
+            </button>
+          )}
+        </div>
+      </div>
 
-          <div className="flex flex-col items-center gap-3">
-            <div className={`text-4xl md:text-5xl font-mono font-bold tracking-wider select-none ${
-              runningTask ? 'text-violet-400 drop-shadow-[0_0_15px_rgba(167,139,250,0.25)]' : 'text-zinc-600'
-            }`}>
-              {formatTimeStr(elapsed)}
-            </div>
-
-            {runningTask && (
-              <Button
-                variant="destructive"
-                onClick={() => onStopTimer(runningTask._id)}
-                className="bg-red-600 hover:bg-red-500 text-white font-medium cursor-pointer shadow-lg shadow-red-600/15 flex items-center gap-2"
-              >
-                <Square className="w-4 h-4 fill-white" />
-                Stop Tracking
-              </Button>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Left Column: Time Per Task */}
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-1">
+            <h3 className="font-bold text-slate-900 text-xl leading-7">
+              Time Per Task
+            </h3>
+            <p className="text-slate-500 text-sm leading-5">
+              Total cumulative minutes tracked per task.
+            </p>
+          </div>
+          
+          <div className="flex flex-col gap-3">
+            {taskAggs.length === 0 ? (
+              <div className="rounded-xl bg-white border border-slate-200 p-6 text-center text-slate-400 text-sm">
+                No time has been logged yet.
+              </div>
+            ) : (
+              taskAggs.map((agg, idx) => (
+                <div key={idx} className="rounded-xl bg-white border border-slate-200 flex p-4 justify-between items-center shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+                  <div className="min-w-0 flex flex-col gap-2">
+                    <span className="truncate max-w-[220px] font-medium text-slate-900 text-sm leading-5">
+                      {agg.title}
+                    </span>
+                    {agg.status === 'Completed' && (
+                      <span className="rounded-full bg-emerald-50 text-emerald-700 text-xs leading-4 border border-emerald-200 px-2 py-0.5 w-fit font-semibold">
+                        Completed
+                      </span>
+                    )}
+                    {agg.status === 'In Progress' && (
+                      <span className="rounded-full bg-sky-50 text-sky-700 text-xs leading-4 border border-sky-200 px-2 py-0.5 w-fit font-semibold">
+                        In Progress
+                      </span>
+                    )}
+                    {agg.status === 'Pending' && (
+                      <span className="rounded-full bg-amber-50 text-amber-700 text-xs leading-4 border border-amber-200 px-2 py-0.5 w-fit font-semibold">
+                        Pending
+                      </span>
+                    )}
+                  </div>
+                  <span className="shrink-0 font-bold text-emerald-600 text-base leading-6">
+                    {formatDurationFriendly(agg.totalSeconds)}
+                  </span>
+                </div>
+              ))
             )}
           </div>
-        </CardContent>
-      </Card>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left: Total Time per Task Card */}
-        <div className="lg:col-span-1 space-y-6">
-          <Card className="border-zinc-800 bg-zinc-900/20 backdrop-blur-sm">
-            <CardHeader className="pb-3 border-b border-zinc-800/60">
-              <CardTitle className="text-lg text-white font-bold tracking-tight">Time Per Task</CardTitle>
-              <CardDescription className="text-zinc-500 text-xs">Total cumulative minutes tracked per task.</CardDescription>
-            </CardHeader>
-            <CardContent className="p-4">
-              <div className="space-y-4">
-                {taskAggs.length === 0 ? (
-                  <div className="text-center py-8 text-zinc-500 text-sm">No time has been logged yet.</div>
-                ) : (
-                  taskAggs.map((agg, idx) => (
-                    <div key={idx} className="flex justify-between items-center border-b border-zinc-800/40 pb-2.5 last:border-b-0 last:pb-0">
-                      <div className="max-w-[70%]">
-                        <h4 className="text-sm font-semibold text-zinc-300 truncate">{agg.title}</h4>
-                        <span className="text-[10px] text-zinc-500">{agg.status}</span>
-                      </div>
-                      <span className="text-sm font-semibold text-violet-400 font-mono">
-                        {formatDurationFriendly(agg.totalSeconds)}
-                      </span>
-                    </div>
-                  ))
-                )}
-              </div>
-            </CardContent>
-          </Card>
         </div>
 
-        {/* Right: Detailed Logs List */}
-        <div className="lg:col-span-2 space-y-6">
-          <Card className="border-zinc-800 bg-zinc-900/20 backdrop-blur-sm">
-            <CardHeader className="pb-3 border-b border-zinc-800/60 flex flex-row items-center justify-between">
-              <div>
-                <CardTitle className="text-lg text-white font-bold tracking-tight">Session Log History</CardTitle>
-                <CardDescription className="text-zinc-500 text-xs">Detailed records of all recorded sessions.</CardDescription>
-              </div>
-              <FileText className="w-5 h-5 text-zinc-500" />
-            </CardHeader>
-            <CardContent className="p-4">
-              <div className="space-y-3 max-h-[400px] overflow-y-auto pr-1">
-                <AnimatePresence mode="popLayout">
-                  {timeLogs.length === 0 ? (
-                    <div className="text-center py-16 text-zinc-500 text-sm border border-dashed border-zinc-800/60 rounded-xl">
-                      <Calendar className="w-10 h-10 text-zinc-700 mx-auto mb-2" />
-                      No tracking sessions logged.
-                    </div>
-                  ) : (
-                    timeLogs.map((log) => (
-                      <motion.div
-                        key={log._id}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.95 }}
-                        transition={{ duration: 0.25 }}
-                        className="bg-zinc-950/40 border border-zinc-800/60 rounded-lg p-3.5 flex items-center justify-between gap-4 hover:border-zinc-800 transition-colors"
-                      >
-                        <div className="space-y-1.5 flex-1 min-w-0">
-                          <h4 className="text-sm font-bold text-zinc-200 truncate">
-                            {log.taskId ? log.taskId.title : 'Deleted Task'}
-                          </h4>
-                          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-zinc-500 font-light">
-                            <span className="flex items-center gap-1">
-                              <Calendar className="w-3.5 h-3.5" />
-                              {formatDateTime(log.startTime)}
-                            </span>
-                            <span>→</span>
-                            <span>{new Date(log.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                          </div>
-                        </div>
+        {/* Right Column: Session Log History */}
+        <div className="flex flex-col gap-4">
+          <div className="flex justify-between items-start">
+            <div className="flex flex-col gap-1">
+              <h3 className="font-bold text-slate-900 text-xl leading-7">
+                Session Log History
+              </h3>
+              <p className="text-slate-500 text-sm leading-5">
+                Detailed records of all recorded sessions.
+              </p>
+            </div>
+            <button 
+              onClick={handleCopyLogs}
+              className="text-slate-400 hover:text-slate-800 cursor-pointer transition-colors p-1"
+              title="Copy session logs to clipboard"
+            >
+              <Copy className="size-5" />
+            </button>
+          </div>
 
-                        <div className="flex items-center gap-4">
-                          <span className="text-sm font-bold font-mono text-emerald-400 bg-emerald-500/5 px-2.5 py-1 rounded border border-emerald-500/10">
-                            {formatDurationFriendly(log.duration)}
-                          </span>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleDeleteLog(log._id)}
-                            className="text-zinc-500 hover:text-red-400 hover:bg-red-500/5 cursor-pointer w-8 h-8"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </motion.div>
-                    ))
-                  )}
-                </AnimatePresence>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="flex flex-col gap-3 max-h-[500px] overflow-y-auto pr-1">
+            <AnimatePresence mode="popLayout">
+              {timeLogs.length === 0 ? (
+                <div className="rounded-xl bg-white border border-slate-200 p-12 text-center text-slate-400 text-sm flex flex-col items-center gap-2 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+                  <Calendar className="size-10 text-slate-300" />
+                  <span>No tracking sessions logged yet.</span>
+                </div>
+              ) : (
+                timeLogs.map((log) => (
+                  <motion.div
+                    key={log._id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ duration: 0.25 }}
+                    className="rounded-xl bg-white border border-slate-200 flex p-4 justify-between items-center gap-4 hover:border-slate-300 transition-all shadow-[0_2px_8px_rgba(0,0,0,0.02)]"
+                  >
+                    <div className="min-w-0 flex flex-col gap-2">
+                      <span className="truncate font-bold text-slate-800 text-sm leading-5">
+                        {log.taskId ? log.taskId.title : 'Deleted Task'}
+                      </span>
+                      <div className="text-slate-400 text-xs leading-4 flex items-center gap-2">
+                        <Calendar className="size-3.5" />
+                        <span>{formatDateTime(log.startTime)}</span>
+                        <ArrowRight className="size-3" />
+                        <span>{new Date(log.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                      </div>
+                    </div>
+                    <div className="shrink-0 flex items-center gap-3">
+                      <span className="font-bold rounded-md bg-emerald-50 text-emerald-700 text-xs leading-4 border border-emerald-200 px-2.5 py-1">
+                        {formatDurationFriendly(log.duration)}
+                      </span>
+                      <button 
+                        onClick={() => handleDeleteLog(log._id)}
+                        className="text-red-500 hover:text-red-700 cursor-pointer p-1 transition-colors"
+                      >
+                        <Trash2 className="size-4" />
+                      </button>
+                    </div>
+                  </motion.div>
+                ))
+              )}
+            </AnimatePresence>
+          </div>
         </div>
       </div>
     </div>
