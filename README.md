@@ -12,7 +12,7 @@ A premium, full-stack Task and Time Tracking web application. Users can manage t
 
 ## Key Features
 1. **Secure Authentication:** JSON Web Token (JWT) header-based auth, keeping user directories completely isolated.
-2. **AI Task Optimization:** Natural language task creator optimized by the Gemini API (with a smart local fallback helper if no API key is specified).
+2. **AI Task Optimization:** Natural language task creator optimized by the Gemini API.
 3. **Resilient Real-Time Timer:** Store active timer status in the database to prevent losing tracking state during page refreshes or tab closures.
 4. **Daily Productivity Metrics:** Includes status tracking cards, worked-hours calculators, and an animated SVG radial progress ring for task completion ratios.
 
@@ -29,7 +29,7 @@ JWT_SECRET=super_secret_jwt_key_123456
 GEMINI_API_KEY=your_gemini_api_key_here
 ```
 
-*Note: If no `GEMINI_API_KEY` is provided, the application will automatically fall back to a local suggestion engine so you can still test the AI Optimize flow out of the box!*
+*Note: A valid `GEMINI_API_KEY` is required for the AI Task Optimization feature to function.*
 
 ---
 
