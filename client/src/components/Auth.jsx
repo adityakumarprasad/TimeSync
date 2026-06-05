@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Lock, Mail, User, ShieldAlert } from 'lucide-react';
+import { RiTimerFlashLine } from 'react-icons/ri';
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -37,10 +38,10 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4 relative overflow-hidden font-sans">
       {/* Background Gradients */}
-      <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-violet-600/10 blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-emerald-600/10 blur-[120px] pointer-events-none" />
+      <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-emerald-500/5 blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-teal-500/5 blur-[120px] pointer-events-none" />
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -49,21 +50,21 @@ const Auth = () => {
         className="w-full max-w-md z-10"
       >
         <div className="flex flex-col items-center mb-8">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-violet-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-violet-500/20 mb-3 border border-violet-400/20">
-            <Lock className="text-white w-6 h-6" />
+          <div className="w-12 h-12 rounded-xl bg-[linear-gradient(135deg,#10B981,#059669)] flex items-center justify-center shadow-lg shadow-emerald-500/20 mb-3 border border-emerald-400/20">
+            <RiTimerFlashLine className="text-white w-6.5 h-6.5" />
           </div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-white via-zinc-200 to-zinc-400 bg-clip-text text-transparent tracking-tight">
+          <h1 className="text-3xl font-bold text-slate-900 tracking-tight">
             TaskSync
           </h1>
-          <p className="text-sm text-zinc-400 mt-1 font-light">Smart task management & time tracking</p>
+          <p className="text-sm text-slate-500 mt-1 font-light">Smart task management & time tracking</p>
         </div>
 
-        <Card className="border-zinc-800 bg-zinc-900/40 backdrop-blur-xl shadow-xl shadow-black/40">
+        <Card className="border-slate-200 bg-white shadow-xl shadow-slate-200/50 rounded-2xl">
           <CardHeader>
-            <CardTitle className="text-2xl text-white font-semibold">
+            <CardTitle className="text-2xl text-slate-900 font-semibold">
               {isLogin ? 'Welcome Back' : 'Create Account'}
             </CardTitle>
-            <CardDescription className="text-zinc-400">
+            <CardDescription className="text-slate-500">
               {isLogin ? 'Login to continue tracking your productivity' : 'Sign up to get started'}
             </CardDescription>
           </CardHeader>
@@ -76,9 +77,9 @@ const Auth = () => {
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
                     exit={{ opacity: 0, height: 0 }}
-                    className="p-3 bg-red-500/15 border border-red-500/30 rounded-lg flex items-center gap-3 text-red-400 text-sm"
+                    className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3 text-red-600 text-sm"
                   >
-                    <ShieldAlert className="w-4 h-4 flex-shrink-0" />
+                    <ShieldAlert className="w-4 h-4 flex-shrink-0 text-red-500" />
                     <span>{error}</span>
                   </motion.div>
                 )}
@@ -86,46 +87,46 @@ const Auth = () => {
 
               {!isLogin && (
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-zinc-300">Username</label>
+                  <label className="text-sm font-medium text-slate-700">Username</label>
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 w-4 h-4" />
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
                     <Input
                       type="text"
                       placeholder="john_doe"
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
-                      className="pl-10 bg-zinc-900/60 border-zinc-800 focus:border-violet-500 text-white placeholder-zinc-500 focus:ring-1 focus:ring-violet-500"
+                      className="pl-10 bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 placeholder-slate-400 focus:ring-1 focus:ring-emerald-500"
                     />
                   </div>
                 </div>
               )}
 
               <div className="space-y-2">
-                <label className="text-sm font-medium text-zinc-300">
+                <label className="text-sm font-medium text-slate-700">
                   {isLogin ? 'Email or Username' : 'Email Address'}
                 </label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 w-4 h-4" />
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
                   <Input
                     type={isLogin ? 'text' : 'email'}
                     placeholder={isLogin ? 'john@example.com or john_doe' : 'john@example.com'}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="pl-10 bg-zinc-900/60 border-zinc-800 focus:border-violet-500 text-white placeholder-zinc-500 focus:ring-1 focus:ring-violet-500"
+                    className="pl-10 bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 placeholder-slate-400 focus:ring-1 focus:ring-emerald-500"
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium text-zinc-300">Password</label>
+                <label className="text-sm font-medium text-slate-700">Password</label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 w-4 h-4" />
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
                   <Input
                     type="password"
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="pl-10 bg-zinc-900/60 border-zinc-800 focus:border-violet-500 text-white placeholder-zinc-500 focus:ring-1 focus:ring-violet-500"
+                    className="pl-10 bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 placeholder-slate-400 focus:ring-1 focus:ring-emerald-500"
                   />
                 </div>
               </div>
@@ -135,12 +136,12 @@ const Auth = () => {
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white shadow-lg shadow-violet-500/20 py-5 transition-all duration-300 cursor-pointer font-medium"
+                className="w-full bg-[linear-gradient(135deg,#10B981,#059669)] hover:opacity-95 text-white shadow-lg shadow-emerald-500/20 py-5 transition-all duration-300 cursor-pointer font-semibold rounded-lg"
               >
                 {loading ? 'Processing...' : isLogin ? 'Sign In' : 'Create Account'}
               </Button>
 
-              <p className="text-sm text-zinc-400 text-center">
+              <p className="text-sm text-slate-500 text-center">
                 {isLogin ? "Don't have an account? " : 'Already have an account? '}
                 <button
                   type="button"
@@ -148,7 +149,7 @@ const Auth = () => {
                     setIsLogin(!isLogin);
                     setError('');
                   }}
-                  className="text-violet-400 hover:text-violet-300 font-medium underline underline-offset-4 ml-1 cursor-pointer transition-colors"
+                  className="text-emerald-600 hover:text-emerald-700 font-semibold underline underline-offset-4 ml-1 cursor-pointer transition-colors"
                 >
                   {isLogin ? 'Sign Up' : 'Sign In'}
                 </button>
